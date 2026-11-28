@@ -239,8 +239,10 @@ def run_agent(
                 elif call.name == "create_service_order" and normalize_code(args["model"]) not in known:
                     step.error = "Модель не подтверждена вопросом или результатами инструментов."
                 elif call.name == "create_service_order" and not _quantity_in_question(question, args.get("qty")):
+                    step.error = "Количество не названо пользователем."
                     return _result("Сколько штук заказать? Укажите количество в вопросе.", steps)
                 elif call.name == "create_service_order" and not confirm:
+                    step.error = "Заказ ожидает подтверждения пользователя."
                     args = {**args, "part_id": part, "model": normalize_code(args["model"])}
                     return _result(
                         f"Для создания заказа нужно подтверждение: {part}, {args['qty']} шт., "

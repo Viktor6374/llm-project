@@ -37,7 +37,7 @@ def test_number_from_a_date_is_not_a_quantity(question):
 
     result = run_agent(question, llm, tools.as_dict(), confirm=True)
 
-    assert tools.count("create_service_order") == 0
+    assert tools.count("create_service_order") == 0 and result.steps[-1].error
     assert not result.needs_confirmation and "Сколько штук" in result.answer
 
 
@@ -56,6 +56,7 @@ def test_quantity_with_a_unit_is_accepted(question):
 
     assert result.needs_confirmation
     assert result.pending_action == {"tool": "create_service_order", "args": ORDER}
+    assert result.steps[-1].tool == "create_service_order" and result.steps[-1].error
 
 
 def test_invented_model_is_not_sent_to_the_order():
