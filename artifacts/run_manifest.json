@@ -1,0 +1,194 @@
+{
+  "completed_at": "2026-11-28T17:30:48.021990+03:00",
+  "commit": "2461d6034895c7df78c1022bcafab1710dc148b5",
+  "branch": "main",
+  "llm_model": "qwen3:4b-instruct-2507-q4_K_M",
+  "embed_model": "bge-m3",
+  "gpu": "NVIDIA GeForce RTX 5070 Ti",
+  "ollama_version": "0.30.10",
+  "ollama_context": 4096,
+  "pytest_passed": 177,
+  "ruff": "All checks passed!",
+  "fresh_index_cache": true,
+  "cache_files": 520,
+  "embedding_cache_files": 116,
+  "cached_chat_models": [
+    "qwen3:4b-instruct-2507-q4_K_M"
+  ],
+  "index": {
+    "chunks": 92,
+    "nodes": 121,
+    "edges": 275,
+    "communities": 10,
+    "dropped": 75,
+    "conflicts": 0,
+    "llm": {
+      "calls": 102,
+      "cache_hits": 0,
+      "prompt_tokens": 112817,
+      "completion_tokens": 35415
+    }
+  },
+  "evaluations": {
+    "baseline": {
+      "correct": 12,
+      "mode": "baseline",
+      "model": "qwen3:4b-instruct-2507-q4_K_M",
+      "questions": 24,
+      "accuracy": 0.5,
+      "by_type": {
+        "local": {
+          "questions": 5,
+          "accuracy": 1.0
+        },
+        "multihop": {
+          "questions": 7,
+          "accuracy": 0.571
+        },
+        "global": {
+          "questions": 4,
+          "accuracy": 0.0
+        },
+        "tool": {
+          "questions": 5,
+          "accuracy": 0.0
+        },
+        "refusal": {
+          "questions": 3,
+          "accuracy": 1.0
+        }
+      },
+      "fabricated_rate": 0.0,
+      "source_recall": 0.856,
+      "rejected_calls_rate": 0.0,
+      "llm_calls_per_question": 1.0,
+      "tokens_per_question": 1356.125
+    },
+    "local": {
+      "correct": 16,
+      "mode": "local",
+      "model": "qwen3:4b-instruct-2507-q4_K_M",
+      "questions": 24,
+      "accuracy": 0.667,
+      "by_type": {
+        "local": {
+          "questions": 5,
+          "accuracy": 1.0
+        },
+        "multihop": {
+          "questions": 7,
+          "accuracy": 0.714
+        },
+        "global": {
+          "questions": 4,
+          "accuracy": 0.75
+        },
+        "tool": {
+          "questions": 5,
+          "accuracy": 0.0
+        },
+        "refusal": {
+          "questions": 3,
+          "accuracy": 1.0
+        }
+      },
+      "fabricated_rate": 0.0,
+      "source_recall": 0.688,
+      "rejected_calls_rate": 0.0,
+      "llm_calls_per_question": 0.875,
+      "tokens_per_question": 650.167
+    },
+    "global": {
+      "correct": 12,
+      "mode": "global",
+      "model": "qwen3:4b-instruct-2507-q4_K_M",
+      "questions": 24,
+      "accuracy": 0.5,
+      "by_type": {
+        "local": {
+          "questions": 5,
+          "accuracy": 0.8
+        },
+        "multihop": {
+          "questions": 7,
+          "accuracy": 0.143
+        },
+        "global": {
+          "questions": 4,
+          "accuracy": 1.0
+        },
+        "tool": {
+          "questions": 5,
+          "accuracy": 0.0
+        },
+        "refusal": {
+          "questions": 3,
+          "accuracy": 1.0
+        }
+      },
+      "fabricated_rate": 0.0,
+      "source_recall": 0.562,
+      "rejected_calls_rate": 0.0,
+      "llm_calls_per_question": 9.542,
+      "tokens_per_question": 5053.833
+    },
+    "agent": {
+      "correct": 20,
+      "mode": "agent",
+      "model": "qwen3:4b-instruct-2507-q4_K_M",
+      "questions": 24,
+      "accuracy": 0.833,
+      "by_type": {
+        "local": {
+          "questions": 5,
+          "accuracy": 0.8
+        },
+        "multihop": {
+          "questions": 7,
+          "accuracy": 0.714
+        },
+        "global": {
+          "questions": 4,
+          "accuracy": 1.0
+        },
+        "tool": {
+          "questions": 5,
+          "accuracy": 0.8
+        },
+        "refusal": {
+          "questions": 3,
+          "accuracy": 1.0
+        }
+      },
+      "fabricated_rate": 0.0,
+      "source_recall": 0.75,
+      "rejected_calls_rate": 0.074,
+      "llm_calls_per_question": 4.917,
+      "tokens_per_question": 3798.458
+    }
+  },
+  "extraction": {
+    "relations": {
+      "precision": 1.0,
+      "recall": 0.988,
+      "found": 163,
+      "gold": 161
+    },
+    "entities": {
+      "precision": 0.994,
+      "recall": 1.0,
+      "found": 170,
+      "gold": 165
+    },
+    "dropped": 13,
+    "documents": 16
+  },
+  "manual_checks": {
+    "part": "P-1042B",
+    "stock": 3,
+    "price_rub": 2630,
+    "out_of_scope": "В базе знаний не найдено."
+  },
+  "orders_created": false,
+  "source_changes": false
+}

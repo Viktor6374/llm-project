@@ -7,3 +7,6 @@ __pycache__/
 .DS_Store
 .idea
 /artifacts/graph-search-offline/
+/artifacts.zip
+/artifacts-before-gpu-run/
+/run-logs/

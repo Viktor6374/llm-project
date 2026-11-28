@@ -1,0 +1,14 @@
+{
+  "chunks": 92,
+  "nodes": 121,
+  "edges": 275,
+  "communities": 10,
+  "dropped": 75,
+  "conflicts": 0,
+  "llm": {
+    "calls": 102,
+    "cache_hits": 0,
+    "prompt_tokens": 112817,
+    "completion_tokens": 35415
+  }
+}

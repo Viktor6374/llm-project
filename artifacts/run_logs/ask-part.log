@@ -1,0 +1,11 @@
+Для устранения ошибки E-17 на модели AR-210 необходимо заменить пусковое реле P-1042 на деталь P-1042B.
+
+- **Деталь**: Пусковое реле P-1042B  
+- **Остаток на складе в Казани**: 3 штуки  
+- **Цена**: 2630 рублей  
+
+Деталь доступна и есть на складе в Казани.
+Источники: bulletin_SB-2025-03.md, manual_AR-210.md, manual_AR-220.md, manual_AR-310.md, manual_AR-320.md, procedure_SP-104.md, report_R-2025-003.md, report_R-2025-010.md, report_R-2025-012.md, report_R-2025-023.md, report_R-2025-028.md, report_R-2025-034.md, report_R-2025-036.md, report_R-2025-037.md
+  шаг: search_knowledge({"question": "Ошибка E-17 на модели AR-210"}) -> {"answer": "Ошибка E-17 на модели AR-210 указывает на неисправность пускового реле. Модель AR-210 содержит часть P-1042, которая является пусковым реле. Поскольку AR-210 имеет неисправное пусковое реле (P-1042), и P-1042 заменяется на P-1042B, то для устранения ошибки E-17 необходимо заменить пусковое реле P-1042 на P-1042B.\n\nОтвет: Ошибка E-17 на модели AR-210 устраняется заменой пускового реле P-1042 на P-042B.", "facts": ["E-17 -INDICATES-> пусковое реле", "AR-210 -FAILED-> пусковое реле", "P-1042 -IS_A-> пусковое реле", "AR-210 -HAS_PART-> P-1042", "P-1042 -REPLACED_BY-> P-1042B"], "sources": ["bulletin_SB-2025-03.md", "manual_AR-210.md", "manual_AR-220.md", "manual_AR-310.md", "manual_AR-320.md", "procedure_SP-104.md", "report_R-2025-003.md", "report_R-2025-010.md", "report_R-2025-012.md", "report_R-2025-023.md", "report_R-2025-028.md", "report_R-2025-034.md", "report_R-2025-036.md", "report_R-2025-037.md"], "refused": false}
+  шаг: check_stock({"part_id": "P-1042B", "warehouse": "Казань"}) -> {"part_id": "P-1042B", "warehouse": "Казань", "qty": 3, "discontinued": false}
+  шаг: get_price({"part_id": "P-1042B"}) -> {"part_id": "P-1042B", "name": "пусковое реле", "price_rub": 2630, "discontinued": false}

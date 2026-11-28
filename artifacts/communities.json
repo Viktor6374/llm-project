@@ -1,0 +1,183 @@
+[
+  {
+    "community_id": 0,
+    "nodes": [
+      "Component:блок освещения",
+      "Component:контроллер",
+      "ErrorCode:E-15",
+      "ErrorCode:E-19",
+      "ErrorCode:E-24",
+      "Part:P-1022",
+      "Part:P-1050",
+      "Part:P-1122",
+      "Part:P-1150",
+      "Part:P-2022",
+      "Part:P-2122",
+      "Part:P-3022",
+      "Part:P-3122",
+      "Part:P-3126B",
+      "Procedure:SP-106",
+      "Procedure:SP-109",
+      "Procedure:SP-114",
+      "Supplier:АвтоматикаСевер"
+    ],
+    "summary": "Узлы: Component: блок освещения, Component: контроллер, ErrorCode: E-15, ErrorCode: E-19, ErrorCode: E-24, Part: P-1022, Part: P-1050, Part: P-1122, Part: P-1150, Part: P-2022, Part: P-2122, Part: P-3022, Part: P-3122, Part: P-3126B, Procedure: SP-106, Procedure: SP-109, Procedure: SP-114, Supplier: АвтоматикаСевер. Связи: E-15 -INDICATES-> контроллер (вес 14); E-15 -FIXED_BY-> SP-106 (вес 1); E-19 -INDICATES-> блок освещения (вес 5); E-19 -FIXED_BY-> SP-109 (вес 1); E-24 -INDICATES-> контроллер (вес 13); E-24 -FIXED_BY-> SP-114 (вес 1); P-1022 -IS_A-> контроллер (вес 2); P-1022 -SUPPLIED_BY-> АвтоматикаСевер (вес 2); P-1050 -IS_A-> блок освещения (вес 2); P-1050 -SUPPLIED_BY-> АвтоматикаСевер (вес 2); P-1122 -IS_A-> контроллер (вес 2); P-1122 -SUPPLIED_BY-> АвтоматикаСевер (вес 2); P-1150 -IS_A-> блок освещения (вес 2); P-1150 -SUPPLIED_BY-> АвтоматикаСевер (вес 2); P-2022 -IS_A-> контроллер (вес 2); P-2022 -SUPPLIED_BY-> АвтоматикаСевер (вес 2); P-2122 -IS_A-> контроллер (вес 2); P-2122 -SUPPLIED_BY-> АвтоматикаСевер (вес 2); P-3022 -IS_A-> контроллер (вес 2); P-3022 -SUPPLIED_BY-> АвтоматикаСевер (вес 2); P-3122 -IS_A-> контроллер (вес 2); P-3122 -SUPPLIED_BY-> АвтоматикаСевер"
+  },
+  {
+    "community_id": 1,
+    "nodes": [
+      "Component:вентилятор испарителя",
+      "Component:вентилятор конденсатора",
+      "ErrorCode:E-13",
+      "ErrorCode:E-18",
+      "Model:BZ-110",
+      "Model:BZ-120",
+      "Model:BZ-210",
+      "Part:P-1014",
+      "Part:P-1046",
+      "Part:P-1046B",
+      "Part:P-1114",
+      "Part:P-1146",
+      "Part:P-2014",
+      "Part:P-2018",
+      "Part:P-2026",
+      "Part:P-2046",
+      "Part:P-2114",
+      "Part:P-2146",
+      "Part:P-3014",
+      "Part:P-3114",
+      "Procedure:SP-103",
+      "Procedure:SP-108",
+      "ProductLine:Бриз",
+      "Supplier:ВентПром"
+    ],
+    "summary": "Сводка: В линейке «Бриз» модели BZ-110, BZ-120, BZ-210 отмечаются отказы узлов. Отказы узла «вентилятор испарителя» — 6, «нагреватель оттайки» — 3, «компрессор» — 1. Модель BZ-120 имеет 4 отказа, BZ-110 — 3, BZ-210 — 3. Узлы вентилятор испарителя и конденсатора связаны с ошибками E-13 и E-18. Вентилятор конденсатора представлен в компонентах P-1014, P-1114, P-2014, P-2114, P-3014, P-3114. Вентилятор испарителя — в P-1046, P-1146, P-2046, P-2146. Все узлы поставляются или связаны с ВентПром. Связи по отказам и индикациям подтверждают зависимость узлов от моделей и процедур SP-103, SP-108. Всего отказов узлов — 10, моделей — 10."
+  },
+  {
+    "community_id": 2,
+    "nodes": [
+      "Component:датчик температуры",
+      "Component:терморегулирующий вентиль",
+      "ErrorCode:E-14",
+      "ErrorCode:E-21",
+      "Part:P-1018",
+      "Part:P-1118",
+      "Part:P-1118B",
+      "Part:P-2054B",
+      "Part:P-2054C",
+      "Part:P-2058",
+      "Part:P-2118",
+      "Part:P-2158",
+      "Part:P-3018",
+      "Part:P-3058",
+      "Part:P-3118",
+      "Part:P-3158",
+      "Procedure:SP-105",
+      "Procedure:SP-111",
+      "Supplier:ТермоПрибор"
+    ],
+    "summary": "Узлы: Component: датчик температуры, Component: терморегулирующий вентиль, ErrorCode: E-14, ErrorCode: E-21, Part: P-1018, Part: P-1118, Part: P-1118B, Part: P-2054B, Part: P-2054C, Part: P-2058, Part: P-2118, Part: P-2158, Part: P-3018, Part: P-3058, Part: P-3118, Part: P-3158, Procedure: SP-105, Procedure: SP-111, Supplier: ТермоПрибор. Связи: E-14 -INDICATES-> датчик температуры (вес 18); E-14 -FIXED_BY-> SP-105 (вес 1); E-21 -INDICATES-> терморегулирующий вентиль (вес 9); E-21 -FIXED_BY-> SP-111 (вес 1); P-1018 -IS_A-> датчик температуры (вес 2); P-1018 -SUPPLIED_BY-> ТермоПрибор (вес 2); P-1118 -IS_A-> датчик температуры (вес 3); P-1118 -REPLACED_BY-> P-1118B (вес 1); P-1118 -SUPPLIED_BY-> ТермоПрибор (вес 2); P-1118B -SUPPLIED_BY-> ТермоПрибор (вес 1); P-2054B -IS_A-> нагреватель оттайки (вес 1); P-2054B -REPLACED_BY-> P-2054C (вес 1); P-2054B -SUPPLIED_BY-> ТермоПрибор (вес 1); P-2054C -SUPPLIED_BY-> ТермоПрибор (вес 1); P-2058 -IS_A-> терморегулирующий вентиль (вес 2); P-2058 -SUPPLIED_BY-> ТермоПрибор (вес 2); P-2118 -IS_A-> датчик температуры (вес 2); P-2118 -SUPPLIED_BY-> ТермоПрибор (вес 2); P-2158 -IS_A-> терморегулирующий вентиль (вес 2); P-2158 -SUPPLIED_BY-> ТермоПрибор (вес 2);"
+  },
+  {
+    "community_id": 3,
+    "nodes": [
+      "Component:компрессор",
+      "ErrorCode:E-11",
+      "ErrorCode:E-12",
+      "Part:P-1010",
+      "Part:P-1110",
+      "Part:P-2010",
+      "Part:P-2110",
+      "Part:P-2110B",
+      "Part:P-3010",
+      "Part:P-3110",
+      "Procedure:SP-101",
+      "Procedure:SP-102",
+      "Supplier:КомпрессорМаш"
+    ],
+    "summary": "Узлы: Component: компрессор, ErrorCode: E-11, ErrorCode: E-12, Part: P-1010, Part: P-1110, Part: P-2010, Part: P-2110, Part: P-2110B, Part: P-3010, Part: P-3110, Procedure: SP-101, Procedure: SP-102, Supplier: КомпрессорМаш. Связи: E-11 -INDICATES-> компрессор (вес 14); E-11 -FIXED_BY-> SP-101 (вес 1); E-12 -INDICATES-> компрессор (вес 13); E-12 -FIXED_BY-> SP-102 (вес 1); P-1010 -IS_A-> компрессор (вес 2); P-1010 -SUPPLIED_BY-> КомпрессорМаш (вес 2); P-1110 -IS_A-> компрессор (вес 2); P-1110 -SUPPLIED_BY-> КомпрессорМаш (вес 2); P-2010 -IS_A-> компрессор (вес 2); P-2010 -SUPPLIED_BY-> КомпрессорМаш (вес 2); P-2110 -IS_A-> компрессор (вес 3); P-2110 -REPLACED_BY-> P-2110B (вес 1); P-2110 -SUPPLIED_BY-> КомпрессорМаш (вес 2); P-2110B -SUPPLIED_BY-> КомпрессорМаш (вес 1); P-3010 -IS_A-> компрессор (вес 2); P-3010 -SUPPLIED_BY-> КомпрессорМаш (вес 2); P-3110 -IS_A-> компрессор (вес 2); P-3110 -SUPPLIED_BY-> КомпрессорМаш (вес 2). Подсчёты: FIXED_BY: 2; INDICATES: 27; IS_A: 13; REPLACED_BY: 1; SUPPLIED_BY: 13"
+  },
+  {
+    "community_id": 4,
+    "nodes": [
+      "Component:нагреватель оттайки",
+      "ErrorCode:E-20",
+      "Model:BZ-220",
+      "Part:P-2054",
+      "Part:P-2154",
+      "Procedure:SP-110"
+    ],
+    "summary": "Узлы: Component: нагреватель оттайки, ErrorCode: E-20, Model: BZ-220, Part: P-2054, Part: P-2154, Procedure: SP-110. Связи: E-20 -INDICATES-> нагреватель оттайки (вес 9); E-20 -FIXED_BY-> SP-110 (вес 1); BZ-220 -FAILED-> вентилятор испарителя (вес 2); BZ-220 -FAILED-> нагреватель оттайки (вес 1); BZ-220 -HAS_PART-> P-2110 (вес 1); BZ-220 -HAS_PART-> P-2114 (вес 1); BZ-220 -HAS_PART-> P-2118 (вес 1); BZ-220 -HAS_PART-> P-2122 (вес 1); BZ-220 -HAS_PART-> P-2126 (вес 1); BZ-220 -HAS_PART-> P-2146 (вес 1); BZ-220 -HAS_PART-> P-2154 (вес 1); BZ-220 -HAS_PART-> P-2158 (вес 1); BZ-220 -BELONGS_TO-> Бриз (вес 1); P-2054 -IS_A-> нагреватель оттайки (вес 3); P-2054 -REPLACED_BY-> P-2054B (вес 1); P-2054 -SUPPLIED_BY-> ТермоПрибор (вес 2); P-2154 -IS_A-> нагреватель оттайки (вес 2); P-2154 -SUPPLIED_BY-> ТермоПрибор (вес 2). Подсчёты: BELONGS_TO: 1; FAILED: 3; FIXED_BY: 1; HAS_PART: 8; INDICATES: 9; IS_A: 5; REPLACED_BY: 1; SUPPLIED_BY: 4; Отказы модели BZ-220 (линейка Бриз): 3; Отказы узла вентилятор испарителя, линейка Бриз: 2; Отказы узла нагреватель оттайки, линейка Бриз: 1"
+  },
+  {
+    "community_id": 5,
+    "nodes": [
+      "Component:пусковое реле",
+      "Component:реле давления",
+      "ErrorCode:E-16",
+      "ErrorCode:E-17",
+      "Model:AR-210",
+      "Model:AR-220",
+      "Model:AR-310",
+      "Model:AR-320",
+      "Part:P-1026",
+      "Part:P-1042",
+      "Part:P-1042B",
+      "Part:P-1126",
+      "Part:P-1142",
+      "Part:P-2126",
+      "Part:P-3026",
+      "Part:P-3126",
+      "Procedure:SP-104",
+      "Procedure:SP-107",
+      "ProductLine:Арктика",
+      "Supplier:ХолодКомплект"
+    ],
+    "summary": "Узлы: Component: пусковое реле, Component: реле давления, ErrorCode: E-16, ErrorCode: E-17, Model: AR-210, Model: AR-220, Model: AR-310, Model: AR-320, Part: P-1026, Part: P-1042, Part: P-1042B, Part: P-1126, Part: P-1142, Part: P-2126, Part: P-3026, Part: P-3126, Procedure: SP-104, Procedure: SP-107, ProductLine: Арктика, Supplier: ХолодКомплект. Связи: E-16 -INDICATES-> реле давления (вес 17); E-16 -FIXED_BY-> SP-107 (вес 1); E-17 -INDICATES-> пусковое реле (вес 12); E-17 -FIXED_BY-> SP-104 (вес 1); AR-210 -FAILED-> пусковое реле (вес 1); AR-210 -HAS_PART-> P-1010 (вес 1); AR-210 -HAS_PART-> P-1014 (вес 1); AR-210 -HAS_PART-> P-1018 (вес 1); AR-210 -HAS_PART-> P-1022 (вес 1); AR-210 -HAS_PART-> P-1026 (вес 1); AR-210 -HAS_PART-> P-1042 (вес 1); AR-210 -HAS_PART-> P-1046 (вес 1); AR-210 -HAS_PART-> P-1050 (вес 1); AR-210 -BELONGS_TO-> Арктика (вес 1); AR-220 -FAILED-> пусковое реле (вес 1); AR-220 -HAS_PART-> P-1010 (вес 1); AR-220 -HAS_PART-> P-1014 (вес 1); AR-220 -HAS_PART-> P-1018 (вес 1); AR-220 -HAS_PART-> P-1022 (вес 1); AR-220 -HAS_PART-> P-1026 (вес 1); AR-220 -HAS_PART->"
+  },
+  {
+    "community_id": 6,
+    "nodes": [
+      "Component:реле протока",
+      "Component:циркуляционный насос",
+      "ErrorCode:E-22",
+      "ErrorCode:E-23",
+      "Model:GS-410",
+      "Model:GS-420",
+      "Model:GS-510",
+      "Model:GS-520",
+      "Part:P-3062",
+      "Part:P-3062B",
+      "Part:P-3062C",
+      "Part:P-3066",
+      "Part:P-3162",
+      "Part:P-3166",
+      "Procedure:SP-112",
+      "Procedure:SP-113",
+      "ProductLine:Гольфстрим",
+      "Supplier:ГидроТех"
+    ],
+    "summary": "Сводка: В линейке Гольфстрим модели GS-410, GS-420, GS-510 и GS-520 отмечены отказы. Отказы моделей: GS-510 — 4, остальные — по 3. Отказы узла «циркуляционный насос» — 8, «реле давления» — 4, «датчик температуры» — 1. Модели GS-410, GS-420, GS-510, GS-520 входят в линейку Гольфстрим. Узел «циркуляционный насос» представлен как P-3062, P-3062B, P-3062C, P-3162. Узел «реле протока» — как P-3066, P-3166. Поставщик ГидроТех — поставщик P-3062, P-3062B, P-3062C, P-3162. ХолодКомплект — поставщик P-3066, P-3166. Всего отказов узлов — 13."
+  },
+  {
+    "community_id": 7,
+    "nodes": [
+      "Procedure:SP-115"
+    ],
+    "summary": "Фактов для сводки нет."
+  },
+  {
+    "community_id": 8,
+    "nodes": [
+      "Procedure:SP-116"
+    ],
+    "summary": "Фактов для сводки нет."
+  },
+  {
+    "community_id": 9,
+    "nodes": [
+      "Procedure:SP-117"
+    ],
+    "summary": "Фактов для сводки нет."
+  }
+]
