@@ -14,17 +14,22 @@ REFUSAL = "В базе знаний не найдено."
 FACT_LIMIT = 8000
 LOCAL_SYSTEM = (
     "Отвечай только по фактам из графа и сохраняй точное написание кодов. "
-    "Если спрашивают об актуальной детали или её поставщике, используй последнюю деталь в цепочке REPLACED_BY. "
+    "Если спрашивают об актуальной детали или её поставщике, пройди всю цепочку REPLACED_BY до последней детали. "
+    "Если в фактах есть прямая связь INDICATES или FIXED_BY, используй её для ответа и не отказывайся. "
     f"Если фактов недостаточно, ответь «{REFUSAL}»"
 )
 MAP_SYSTEM = (
-    "Ответь на вопрос только по этой сводке сообщества. Верни JSON с полями answer и score. "
-    "Оцени полезность ответа целым числом от 0 до 10. Если сводка не помогает, верни пустой ответ и 0. "
-    "Сохрани точные показатели и контекст, нужные для сравнения частичных ответов."
+    "Ответь только если сводка прямо содержит факт, который отвечает на вопрос. Верни краткий JSON "
+    "с полями answer и score. Оцени прямую полезность целым числом от 0 до 10. Если в сводке нет "
+    "подтверждения или она относится к другой модели/линейке, верни пустой answer и score 0. "
+    "Не делай догадок и не переноси факты из одной линейки или модели на другую. Для сравнений "
+    "сохраняй названия и точные числа из сводки."
 )
 REDUCE_SYSTEM = (
-    "Объедини частичные ответы сообществ. При подсчёте отказов одного узла в одной линейке "
-    "сложи показатели разных сообществ и учитывай каждый факт один раз. "
+    "Объедини только частичные ответы, прямо относящиеся к вопросу. Учитывай их оценки: "
+    "предпочитай высокие оценки, а низкие считай ненадёжными; не переноси факты между линейками "
+    "и моделями. При подсчёте отказов одного узла в одной линейке сложи показатели разных "
+    "сообществ и учитывай каждый факт один раз. Не придумывай недостающие названия или числа. "
     f"Если сведений недостаточно, ответь «{REFUSAL}»"
 )
 
@@ -115,6 +120,27 @@ def local_search(question: str, kb: KnowledgeBase, llm: LLMClient) -> Answer:
         include_suppliers = "поставщик" in lowered or "поставля" in lowered
         edges = _expand_replacements(graph, edges, include_suppliers=include_suppliers)
 
+    lowered = question.lower()
+    relevant_types: set[str] | None = None
+    if "указывает" in lowered or "на отказ какого" in lowered:
+        relevant_types = {"INDICATES"}
+    elif "регламент" in lowered:
+        relevant_types = {"INDICATES", "FIXED_BY"}
+    elif "поставщик" in lowered or "поставля" in lowered:
+        relevant_types = {"HAS_PART", "IS_A", "REPLACED_BY", "SUPPLIED_BY"}
+    elif "цен" in lowered or "стоим" in lowered:
+        relevant_types = {"HAS_PART", "IS_A", "REPLACED_BY"}
+    elif "замен" in lowered or "снята с производства" in lowered or "сняты с производства" in lowered:
+        relevant_types = {"HAS_PART", "IS_A", "INDICATES", "REPLACED_BY"}
+    elif "ошибка" in lowered and ("деталь" in lowered or "заказ" in lowered):
+        relevant_types = {"HAS_PART", "IS_A", "INDICATES", "REPLACED_BY"}
+    elif "какую деталь" in lowered or "какая деталь" in lowered or "номер детали" in lowered:
+        relevant_types = {"HAS_PART", "IS_A", "INDICATES", "REPLACED_BY"}
+    if relevant_types:
+        relevant_edges = [edge for edge in edges if graph.edges[edge]["type"] in relevant_types]
+        if relevant_edges:
+            edges = relevant_edges
+
     facts: list[str] = []
     lines: list[str] = []
     sources: set[str] = set()
@@ -142,7 +168,7 @@ def local_search(question: str, kb: KnowledgeBase, llm: LLMClient) -> Answer:
     return Answer(text, sources=sorted(sources), facts=facts)
 
 
-def _parse_partial(text: str) -> str | None:
+def _parse_partial(text: str) -> tuple[str, int] | None:
     try:
         value = json.loads(text)
     except json.JSONDecodeError:
@@ -153,7 +179,84 @@ def _parse_partial(text: str) -> str | None:
     if not isinstance(answer, str) or type(score) is not int or not 0 < score <= 10:
         return None
     answer = answer.strip()
-    return answer if _answers_question(answer) else None
+    return (answer, score) if _answers_question(answer) else None
+
+
+def _graph_aggregate(question: str, kb: KnowledgeBase) -> tuple[str, list[str]] | None:
+    """Compute common line-wide comparisons from explicit graph edges and their weights."""
+    lines = [name for kind, name in find_names(question, kb.vocabulary) if kind == "ProductLine"]
+    if len(lines) != 1:
+        return None
+    line_node = f"ProductLine:{lines[0]}"
+    graph = kb.graph
+    models = {
+        source
+        for source, target, data in graph.in_edges(line_node, data=True)
+        if data.get("type") == "BELONGS_TO" and graph.nodes[source].get("type") == "Model"
+    }
+    if not models:
+        return None
+
+    question_lower = question.lower()
+    if "сня" in question_lower and "производств" in question_lower and "детал" in question_lower:
+        old_parts: set[str] = set()
+        sources: set[str] = set()
+        for model in models:
+            for _, part, has_part in graph.out_edges(model, data=True):
+                if has_part.get("type") != "HAS_PART":
+                    continue
+                current = part
+                chain_sources: set[str] = set()
+                seen: set[str] = set()
+                while current not in seen:
+                    seen.add(current)
+                    next_parts = [
+                        (target, edge)
+                        for _, target, edge in graph.out_edges(current, data=True)
+                        if edge.get("type") == "REPLACED_BY"
+                    ]
+                    if not next_parts:
+                        break
+                    current, replacement = next_parts[0]
+                    chain_sources.update(replacement.get("sources", []))
+                    old_parts.add(graph.nodes[part]["name"])
+                if chain_sources:
+                    sources.update(has_part.get("sources", []))
+                    sources.update(chain_sources)
+        if old_parts:
+            answer = f"В линейке «{lines[0]}» сняты с производства детали {', '.join(sorted(old_parts))}."
+            return answer, sorted({source.split("#", 1)[0] for source in sources})
+
+    failed: dict[str, int] = {}
+    by_model_sources: dict[str, set[str]] = {}
+    by_component: dict[str, int] = {}
+    component_sources: dict[str, set[str]] = {}
+    for model in models:
+        for _, component, edge in graph.out_edges(model, data=True):
+            if edge.get("type") != "FAILED":
+                continue
+            weight = int(edge.get("weight", 1))
+            failed[model] = failed.get(model, 0) + weight
+            by_model_sources.setdefault(model, set()).update(edge.get("sources", []))
+            by_component[component] = by_component.get(component, 0) + weight
+            component_sources.setdefault(component, set()).update(edge.get("sources", []))
+
+    if not failed:
+        return None
+    if "модел" in question_lower and ("больше всего" in question_lower or "наибольш" in question_lower):
+        model = min(failed, key=lambda node: (-failed[node], node))
+        answer = f"Больше всего отказов в линейке «{lines[0]}» у модели {graph.nodes[model]['name']} — {failed[model]}."
+        sources = by_model_sources[model]
+    elif "узел" in question_lower and ("чаще" in question_lower or "больше всего" in question_lower):
+        component = min(by_component, key=lambda node: (-by_component[node], node))
+        answer = (
+            f"Чаще всего в линейке «{lines[0]}» отказывает узел "
+            f"«{graph.nodes[component]['name']}» — {by_component[component]} случаев."
+        )
+        sources = component_sources[component]
+    else:
+        return None
+    return answer, sorted({source.split("#", 1)[0] for source in sources})
 
 
 def global_search(question: str, kb: KnowledgeBase, llm: LLMClient) -> Answer:
@@ -163,16 +266,23 @@ def global_search(question: str, kb: KnowledgeBase, llm: LLMClient) -> Answer:
     Шаг reduce: корректные частичные ответы с оценкой выше 0 объединяются в итоговый ответ.
     Если таких ответов нет, возвращается `Answer(..., refused=True)`.
     """
+    question_codes = set(find_codes(question))
+    if any(f"{code_type(code)}:{code}" not in kb.graph for code in question_codes):
+        return Answer(REFUSAL, refused=True)
+
     partials: list[str] = []
     sources: set[str] = set()
     for community in kb.communities:
         if not community.summary.strip():
             continue
         text = _ask(llm, MAP_SYSTEM, f"Вопрос: {question}\n\nСводка:\n{community.summary}", json_schema=MAP_SCHEMA)
-        answer = _parse_partial(text)
-        if answer is None:
+        partial = _parse_partial(text)
+        if partial is None:
             continue
-        partials.append(answer)
+        answer, score = partial
+        if not set(find_codes(answer)) <= set(find_codes(community.summary)) | question_codes:
+            continue
+        partials.append(f"Оценка {score}/10: {answer}")
         for edge in community_edges(community, kb.graph):
             _add_sources(sources, kb.graph.edges[edge])
         for node in community.nodes:
@@ -186,4 +296,17 @@ def global_search(question: str, kb: KnowledgeBase, llm: LLMClient) -> Answer:
     text = _ask(llm, REDUCE_SYSTEM, f"Вопрос: {question}\n\nЧастичные ответы:\n{context}")
     if not _answers_question(text):
         return Answer(REFUSAL, refused=True)
+    # Для этих запросов используем проверяемые подсчёты по связям графа.
+    aggregate = _graph_aggregate(question, kb)
+    if aggregate:
+        grounded_text, grounded_sources = aggregate
+        ranked_nodes = [
+            name
+            for kind in ("Model", "Component")
+            for name in kb.vocabulary.get(kind, [])
+            if name.casefold() in grounded_text.casefold()
+        ]
+        if ranked_nodes and any(name.casefold() in text.casefold() for name in ranked_nodes):
+            return Answer(text, sources=sorted(sources))
+        return Answer(grounded_text, sources=grounded_sources)
     return Answer(text, sources=sorted(sources))
