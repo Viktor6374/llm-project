@@ -52,6 +52,17 @@ EXAMPLE_TRIPLES = [
     ("Part", "P-3030B", "SUPPLIED_BY", "Supplier", "АвтоматикаСевер"),
 ]
 _WRAPPERS = re.compile(r"<think>.*?</think>|```(?:json)?", re.DOTALL)
+_MANUAL_PART = re.compile(
+    r"^\s*[-*]\s*(?P<component>.+?)\s*[–—-]\s*деталь\s+"
+    r"(?P<part>[A-ZА-Я]{1,4}[\s-]*\d+[A-ZА-Я]?)\s*,\s*поставщик\s+"
+    r"[«\"](?P<supplier>[^»\"]+)[»\"]\s*$",
+    re.IGNORECASE,
+)
+_PROCEDURE_APPLIES = re.compile(
+    r"регламент\s+(?P<procedure>[A-ZА-Я]{2}\s*-?\s*\d+)\s+"
+    r"применяется\s+при\s+ошибке\s+(?P<error>[A-ZА-Я]\s*-?\s*\d+)",
+    re.IGNORECASE,
+)
 
 
 def _example_answer() -> str:
@@ -154,6 +165,75 @@ def _ground(chunk: Chunk, raw_entities: list[dict], raw_relations: list[dict]) -
     return ExtractionResult(chunk.chunk_id, chunk.doc_id, list(entities.values()), list(relations.values()), dropped)
 
 
+def _structured_facts(chunk: Chunk) -> list[Relation]:
+    """Извлекает явные факты из типовых строк руководств и регламентов.
+
+    LLM остаётся основным способом извлечения. Шаблоны дополнительно находят явно записанные
+    связи модели с деталями, необходимые для сопоставления руководств с бюллетенями о заменах.
+    """
+    text = chunk.text
+    codes = set(find_codes(text))
+    names = vocabulary()
+    result: list[Relation] = []
+
+    if chunk.doc_id.startswith("manual_"):
+        model = next((code for code in sorted(codes) if code_type(code) == "Model"), None)
+        if model:
+            model_entity = Entity("Model", model)
+            for line in text.splitlines():
+                match = _MANUAL_PART.match(line)
+                if not match:
+                    continue
+                part_code = normalize_code(match.group("part"))
+                component = canonical_name("Component", match.group("component"), names)
+                supplier = canonical_name("Supplier", match.group("supplier"), names)
+                if not part_code or part_code not in codes or not component or not supplier:
+                    continue
+                part = Entity("Part", part_code)
+                result.extend(
+                    (
+                        Relation(model_entity, "HAS_PART", part),
+                        Relation(part, "IS_A", Entity("Component", component)),
+                        Relation(part, "SUPPLIED_BY", Entity("Supplier", supplier)),
+                    )
+                )
+
+    if chunk.doc_id.startswith("procedure_"):
+        for match in _PROCEDURE_APPLIES.finditer(text):
+            procedure = normalize_code(match.group("procedure"))
+            error = normalize_code(match.group("error"))
+            if (
+                procedure in codes
+                and error in codes
+                and code_type(procedure) == "Procedure"
+                and code_type(error) == "ErrorCode"
+            ):
+                result.append(Relation(Entity("ErrorCode", error), "FIXED_BY", Entity("Procedure", procedure)))
+
+    return result
+
+
+def _supplement_structured_facts(result: ExtractionResult, chunk: Chunk) -> ExtractionResult:
+    relations = {
+        (item.subject.node_id, item.type, item.object.node_id): item for item in result.relations
+    }
+    for relation in _structured_facts(chunk):
+        if relation.matches_schema():
+            relations.setdefault((relation.subject.node_id, relation.type, relation.object.node_id), relation)
+
+    entities = {item.node_id: item for item in result.entities}
+    for relation in relations.values():
+        entities.setdefault(relation.subject.node_id, relation.subject)
+        entities.setdefault(relation.object.node_id, relation.object)
+    return ExtractionResult(
+        result.chunk_id,
+        result.doc_id,
+        list(entities.values()),
+        list(relations.values()),
+        result.dropped,
+    )
+
+
 def extract_chunk(chunk: Chunk, llm: LLMClient) -> ExtractionResult:
     """Возвращает сущности и связи чанка строго по схеме графа.
 
@@ -170,6 +250,6 @@ def extract_chunk(chunk: Chunk, llm: LLMClient) -> ExtractionResult:
         content = llm.chat(messages, json_schema=EXTRACTION_SCHEMA, max_tokens=MAX_TOKENS).content
         parsed = _parse(content)
         if parsed is not None:
-            return _ground(chunk, *parsed)
+            return _supplement_structured_facts(_ground(chunk, *parsed), chunk)
         messages = [*messages, {"role": "assistant", "content": content}, {"role": "user", "content": RETRY_PROMPT}]
     return ExtractionResult(chunk.chunk_id, chunk.doc_id)

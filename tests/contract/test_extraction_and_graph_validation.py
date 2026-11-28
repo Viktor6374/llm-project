@@ -16,6 +16,12 @@ MANUAL = Chunk(
     "# Руководство по эксплуатации: витрина AR-210\n\nВитрина AR-210 входит в линейку «Арктика».\n\n"
     "- пусковое реле – деталь P-1042, поставщик «ХолодКомплект»",
 )
+PROCEDURE = Chunk(
+    "procedure_SP-112.md#0",
+    "procedure_SP-112.md",
+    "# Регламент SP-112: Замена циркуляционного насоса\n\n"
+    "Регламент SP-112 применяется при ошибке E-22.",
+)
 
 
 def test_reversed_relation_is_turned_by_entity_types():
@@ -23,7 +29,7 @@ def test_reversed_relation_is_turned_by_entity_types():
 
     result = extract_chunk(MANUAL, llm)
 
-    assert triples(result) == {("Part:P-1042", "IS_A", "Component:пусковое реле")}
+    assert ("Part:P-1042", "IS_A", "Component:пусковое реле") in triples(result)
 
 
 def test_code_with_wrong_type_gets_the_type_of_its_form():
@@ -31,7 +37,7 @@ def test_code_with_wrong_type_gets_the_type_of_its_form():
 
     result = extract_chunk(MANUAL, llm)
 
-    assert triples(result) == {("Model:AR-210", "HAS_PART", "Part:P-1042")}
+    assert ("Model:AR-210", "HAS_PART", "Part:P-1042") in triples(result)
     assert "Part:P-1042" in {entity.node_id for entity in result.entities}
 
 
@@ -40,7 +46,8 @@ def test_failed_outside_a_report_is_dropped():
 
     result = extract_chunk(MANUAL, llm)
 
-    assert triples(result) == set() and result.dropped == 1
+    assert not any(relation == "FAILED" for _, relation, _ in triples(result))
+    assert result.dropped == 1
 
 
 def test_answer_wrapped_in_reasoning_and_fence_is_parsed():
@@ -49,7 +56,7 @@ def test_answer_wrapped_in_reasoning_and_fence_is_parsed():
     result = extract_chunk(MANUAL, llm)
 
     assert len(llm.requests) == 1
-    assert {entity.node_id for entity in result.entities} == {"ProductLine:Арктика"}
+    assert "ProductLine:Арктика" in {entity.node_id for entity in result.entities}
 
 
 def test_retry_request_differs_from_the_first_one():
@@ -66,7 +73,24 @@ def test_duplicates_inside_a_chunk_are_merged():
 
     result = extract_chunk(MANUAL, llm)
 
-    assert len(result.relations) == 1 and result.dropped == 0
+    assert sum(relation.type == "BELONGS_TO" for relation in result.relations) == 1
+    assert result.dropped == 0
+
+
+def test_manual_structure_recovers_model_part_component_and_supplier_links():
+    result = extract_chunk(MANUAL, FakeLLM([reply()]))
+
+    assert triples(result) == {
+        ("Model:AR-210", "HAS_PART", "Part:P-1042"),
+        ("Part:P-1042", "IS_A", "Component:пусковое реле"),
+        ("Part:P-1042", "SUPPLIED_BY", "Supplier:ХолодКомплект"),
+    }
+
+
+def test_procedure_structure_recovers_explicit_error_mapping():
+    result = extract_chunk(PROCEDURE, FakeLLM([reply()]))
+
+    assert triples(result) == {("ErrorCode:E-22", "FIXED_BY", "Procedure:SP-112")}
 
 
 def test_graph_keeps_its_attributes_after_json_round_trip():

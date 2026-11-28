@@ -1,9 +1,11 @@
 """Сообщества графа и их сводки. Требование FR-3."""
 
+import re
 from collections import Counter
 
 import networkx as nx
 
+from assistant.infra.grounding import find_codes
 from assistant.infra.llm import LLMClient
 from assistant.infra.schemas import Community
 
@@ -71,11 +73,33 @@ def summarize_community(community: Community, graph: nx.DiGraph, llm: LLMClient)
         {
             "role": "system",
             "content": (
-                "Напиши сводку сообщества до 150 слов по переданным данным. Укажи линейки, модели и замены деталей. "
-                "Приведи готовые числа отказов по моделям и узлам каждой линейки, начиная с наибольших значений. "
-                "Число отказов определяется весом связей FAILED."
+                "Составь сводку до 150 слов, используя только переданные узлы, связи и готовые подсчёты. "
+                "Не придумывай коды, названия, связи и числа. Указывай модель и линейку только если они есть "
+                "среди участников или в связях. Число отказов бери только из строк «Отказы модели» и "
+                "«Отказы узла»; веса INDICATES, IS_A и SUPPLIED_BY не являются числом отказов. "
+                "Если сообщество не содержит связей, кратко сообщи, что фактов для сводки нет."
             ),
         },
         {"role": "user", "content": context},
     ]
-    return " ".join(llm.chat(messages).content.split()[:150])
+    generated = " ".join(llm.chat(messages).content.split()[:150])
+
+    def numeric_values(value: str) -> set[str]:
+        without_codes = value
+        for code in find_codes(value):
+            without_codes = without_codes.replace(code, " ")
+        return set(re.findall(r"(?<![\w-])\d+(?![\w-])", without_codes))
+
+    claims_no_facts = "фактов для сводки нет" in generated.lower()
+    if (
+        not (claims_no_facts and facts)
+        and set(find_codes(generated)) <= set(find_codes(context))
+        and numeric_values(generated) <= numeric_values(context)
+    ):
+        return generated
+
+    # Не допускаем коды и числа, которых нет в графе.
+    fallback = "Узлы: " + ", ".join(members) + ". Связи: " + "; ".join(facts) + ". Подсчёты: " + "; ".join(
+        statistics
+    )
+    return " ".join(fallback.split()[:150])
