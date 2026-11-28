@@ -67,6 +67,15 @@ def test_local_uses_three_hop_path_and_its_replacement_chain():
     assert all("SP-104" not in fact and "AR-310" not in fact for fact in answer.facts)
 
 
+def test_local_keeps_direct_indicates_fact_for_a_component_question(kb):
+    llm = FakeLLM(["Ошибка E-17 указывает на пусковое реле."])
+
+    answer = local_search("На отказ какого узла указывает ошибка E-17?", kb, llm)
+
+    assert not answer.refused
+    assert answer.facts == ["E-17 -INDICATES-> пусковое реле"]
+
+
 def test_local_disconnected_anchors_do_not_fall_back_to_neighbours():
     graph = nx.DiGraph()
     add_fact(graph, "Model:AR-210", "HAS_PART", "Part:P-4010", "manual_a.md#0")
@@ -131,3 +140,39 @@ def test_global_reports_only_the_sources_of_useful_partials():
     assert "У AR-210 было 37 отказов" in reduce_prompt
     assert "У AR-220 было 12 отказов" in reduce_prompt
     assert "Не относится к вопросу" not in reduce_prompt
+
+
+def test_global_model_ranking_is_checked_against_failed_edge_weights():
+    graph = nx.DiGraph()
+    add_fact(graph, "Model:AR-210", "BELONGS_TO", "ProductLine:Арктика", "manual_AR-210.md#0")
+    add_fact(graph, "Model:AR-310", "BELONGS_TO", "ProductLine:Арктика", "manual_AR-310.md#0")
+    add_fact(graph, "Model:AR-210", "FAILED", "Component:пусковое реле", "report_a.md#0", weight=7)
+    add_fact(graph, "Model:AR-310", "FAILED", "Component:пусковое реле", "report_b.md#0", weight=2)
+    summary = Community(0, sorted(graph.nodes), "У AR-210 7 отказов, у AR-310 2 отказа.")
+    llm = FakeLLM(['{"answer": "AR-310", "score": 9}', "У AR-310 больше отказов."])
+    kb = KnowledgeBase(graph, [summary], {"ProductLine": ["Арктика"]})
+
+    answer = global_search("У какой модели линейки «Арктика» больше всего отказов?", kb, llm)
+
+    assert "AR-210" in answer.text and "7" in answer.text
+    assert answer.sources == ["report_a.md"]
+
+
+def test_global_discontinued_parts_are_checked_against_model_and_replacement_edges():
+    graph = nx.DiGraph()
+    add_fact(graph, "Model:BZ-110", "BELONGS_TO", "ProductLine:Бриз", "manual_BZ-110.md#0")
+    add_fact(graph, "Model:BZ-110", "HAS_PART", "Part:P-2054", "manual_BZ-110.md#0")
+    add_fact(graph, "Model:BZ-210", "BELONGS_TO", "ProductLine:Бриз", "manual_BZ-210.md#0")
+    add_fact(graph, "Model:BZ-210", "HAS_PART", "Part:P-2110", "manual_BZ-210.md#0")
+    add_fact(graph, "Part:P-2054", "REPLACED_BY", "Part:P-2054B", "bulletin_a.md#0")
+    add_fact(graph, "Part:P-2054B", "REPLACED_BY", "Part:P-2054C", "bulletin_b.md#0")
+    add_fact(graph, "Part:P-2110", "REPLACED_BY", "Part:P-2110B", "bulletin_c.md#0")
+    summary = Community(0, sorted(graph.nodes), "P-2054 и P-2110 заменены.")
+    llm = FakeLLM(['{"answer": "P-2054 и P-2110 заменены.", "score": 9}', "Деталь P-9999 снята с производства."])
+    kb = KnowledgeBase(graph, [summary], {"ProductLine": ["Бриз"]})
+
+    answer = global_search("Какие детали линейки «Бриз» сняты с производства?", kb, llm)
+
+    assert "P-2054" in answer.text and "P-2110" in answer.text
+    assert "P-9999" not in answer.text
+    assert answer.sources == ["bulletin_a.md", "bulletin_b.md", "bulletin_c.md", "manual_BZ-110.md", "manual_BZ-210.md"]
